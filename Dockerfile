@@ -1,0 +1,52 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV DISPLAY=:0
+ENV RESOLUTION=1280x720x24
+ENV VNC_PORT=5900
+ENV PORT=6080
+
+# 1. Update and install core packages, desktop environment (XFCE4), and utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    wget \
+    git \
+    sudo \
+    bash \
+    net-tools \
+    procps \
+    htop \
+    neofetch \
+    python3 \
+    python3-pip \
+    xvfb \
+    x11vnc \
+    xfce4 \
+    xfce4-terminal \
+    dbus-x11 \
+    xauth \
+    xterm \
+    zip \
+    unzip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Install noVNC and websockify
+RUN git clone https://github.com/novnc/noVNC.git /opt/novnc \
+    && git clone https://github.com/novnc/websockify /opt/novnc/utils/websockify \
+    && cp /opt/novnc/vnc.html /opt/novnc/index.html
+
+# 3. Create default user environment & startup script
+WORKDIR /root
+
+COPY startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
+# Expose default port
+EXPOSE 6080
+
+CMD ["/startup.sh"]
